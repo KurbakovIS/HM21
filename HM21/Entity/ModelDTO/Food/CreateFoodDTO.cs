@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HM21.Entity.ModelDTO
 {
-    public class CreateFoodDTO : ManipulationFoodDTO
+    public class CreateFoodDto : ManipulationFoodDTO
     {
     }
 }

@@ -33,6 +33,7 @@ namespace HM21
         {
             services.ConfigureCors();
             services.ConfigureSqlContext(Configuration);
+            services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
