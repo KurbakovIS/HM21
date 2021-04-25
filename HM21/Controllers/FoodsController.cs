@@ -12,6 +12,8 @@ using AutoMapper;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using System.Globalization;
+using HM21.Entity.ModelDTO.Food;
+using Newtonsoft.Json;
 
 namespace HM21.Controllers
 {

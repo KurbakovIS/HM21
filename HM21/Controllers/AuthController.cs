@@ -55,9 +55,8 @@ namespace HM21.Controllers
         public async Task<IActionResult> Auth([FromBody] UserAuth user)
         {
             if (!await _authManager.ValidateUser(user))
-            {
                 return Unauthorized("Authentication failed. Wrong user name or password");
-            }
+
             return Ok(new { Token = await _authManager.CreateToken() });
         }
     }
