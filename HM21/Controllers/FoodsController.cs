@@ -91,7 +91,7 @@ namespace HM21.Controllers
 
         // POST: api/Foods
         [HttpPost]
-        public async Task<ActionResult<Food>> CreateFood(CreateFoodDto food)
+        public async Task<ActionResult<Food>> CreateFood([FromForm ]CreateFoodDto food)
         {
 
             var uniqueNameFile = "";
