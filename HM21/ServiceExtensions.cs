@@ -32,11 +32,11 @@ namespace HM21
         {
             var builder = services.AddIdentityCore<User>(o =>
             {
-                o.Password.RequireDigit = true;
+                o.Password.RequireDigit = false;
                 o.Password.RequireLowercase = false;
                 o.Password.RequireUppercase = false;
                 o.Password.RequireNonAlphanumeric = false;
-                o.Password.RequiredLength = 10;
+                o.Password.RequiredLength = 6;
             });
 
             builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), builder.Services);

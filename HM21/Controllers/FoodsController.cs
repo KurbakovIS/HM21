@@ -9,11 +9,11 @@ using HM21.Entity;
 using HM21.Entity.Model;
 using HM21.Entity.ModelDTO;
 using AutoMapper;
-using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using System.Globalization;
 using HM21.Entity.ModelDTO.Food;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace HM21.Controllers
 {
@@ -35,7 +35,10 @@ namespace HM21.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Food>>> GetFoods()
         {
-            return await _context.Foods.ToListAsync();
+            var foods = await _context.Foods.ToListAsync();
+            foreach(var food in foods)
+                food.Img = GetFile(food.Img);
+            return foods;
         }
 
         // GET: api/Foods/5
@@ -43,7 +46,7 @@ namespace HM21.Controllers
         public async Task<ActionResult<Food>> GetFood(int id)
         {
             var food = await _context.Foods.FindAsync(id);
-
+            food.Img = GetFile(food.Img);
             if (food == null)
                 return NotFound();
 
@@ -52,21 +55,14 @@ namespace HM21.Controllers
 
         // PUT: api/Foods/5
        
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutFood(int id, UpdateFoodDTO food)
+        [HttpPut]
+        public async Task<IActionResult> PutFood( [FromForm]UpdateFoodDTO food)
         {
-            if (id != food.Id)
-                return BadRequest();
+            if (!FoodExists(food.Id))
+                return NotFound();
 
-
-            var style = NumberStyles.Number | NumberStyles.AllowCurrencySymbol;
-            var provider = new CultureInfo("ru-RU");
-
-            var number = Decimal.Parse(food.Price.Replace('.', ','), style, provider);
-
-            var foodentity = _mapper.Map<Food>(food);
-
-            //_context.Entry(food).State = EntityState.Modified;
+            var foodentity =await _context.Foods.FindAsync(food.Id);
+            _mapper.Map(food, foodentity);
 
             if (food.Img != null)
             {
@@ -80,10 +76,7 @@ namespace HM21.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!FoodExists(id))
-                    return NotFound();
-                else
-                    throw;
+                return BadRequest();
             }
 
             return NoContent();
@@ -91,8 +84,10 @@ namespace HM21.Controllers
 
         // POST: api/Foods
         [HttpPost]
-        public async Task<ActionResult<Food>> CreateFood([FromForm ]CreateFoodDto food)
+        public async Task<ActionResult<Food>> CreateFood([FromForm]CreateFoodDto food)
         {
+            if(food.Name == null)
+                return NotFound();
 
             var uniqueNameFile = "";
             var style = NumberStyles.Number | NumberStyles.AllowCurrencySymbol;
@@ -105,23 +100,11 @@ namespace HM21.Controllers
             {
                 var number = Decimal.Parse(food.Price.Replace('.', ','), style, provider);
 
-
                 var foodEntity = _mapper.Map<Food>(food);
                 foodEntity.Img = $"img/uploads/{uniqueNameFile}";
                 _context.Foods.Add(foodEntity);
 
                 await _context.SaveChangesAsync();
-                //using var db = new DataContext();
-                //db.Foods.Add(
-                //    new Food
-                //    {
-                //        Name = food.Name,
-                //        Description = food.Description,
-                //        Price = number,
-                //        Img = $"img/uploads/{uniqueNameFile}"
-                //    }
-                //    );
-                //db.SaveChanges();
             }
             catch (Exception e)
             {
@@ -129,14 +112,6 @@ namespace HM21.Controllers
                 return BadRequest(e.Message);
             }
             return Ok();
-
-
-            //var foodEntity = _mapper.Map<Food>(food);
-            //_context.Foods.Add(foodEntity);
-
-            //await _context.SaveChangesAsync();
-
-            //return Ok();
         }
 
         // DELETE: api/Foods/5
@@ -176,7 +151,7 @@ namespace HM21.Controllers
         /// <returns>уникальное название изображения</returns>
         async Task<string> RecordImg(IFormFile Img)
         {
-            var uploads = Path.Combine(hostingEnvironment.WebRootPath, "img\\uploads");
+            var uploads = Path.Combine(hostingEnvironment.ContentRootPath, "img\\uploads");
 
             if (!Directory.Exists(uploads))
                 Directory.CreateDirectory(uploads);
@@ -202,6 +177,19 @@ namespace HM21.Controllers
                       + "_" + Guid.NewGuid().ToString().Substring(0, 4)
                       + Path.GetExtension(FileName);
         }
+
+        /// <summary>
+        /// Находит файл в системе и конвертирует его в base64
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+         string GetFile(string fileName)
+        {
+            var path = Path.Combine(hostingEnvironment.ContentRootPath, fileName);
+            var mas = System.IO.File.ReadAllBytes(path);
+            var base64String = Convert.ToBase64String(mas, 0, mas.Length);
+            return "data:image/png;base64," + base64String;
+        }
     }
     /// <summary>
     /// Расширение FileExtensions для ассинхронного удаления
@@ -218,5 +206,7 @@ namespace HM21.Controllers
             return Task.Factory.StartNew(() => fi.Delete());
         }
     }
+
+
 
 }

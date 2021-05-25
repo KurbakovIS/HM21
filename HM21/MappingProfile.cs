@@ -14,7 +14,7 @@ namespace HM21
         public MappingProfile()
         {
             CreateMap<CreateFoodDto, Food>();
-            CreateMap<UpdateFoodDTO, Food>();
+            CreateMap<UpdateFoodDTO, Food>().ReverseMap();
             CreateMap<UserRegistration, User>();
         }
     }
