@@ -140,7 +140,7 @@ namespace HM21.Controllers
         /// <param name="Img">название картинки</param>
         async void DeleteImg(string Img)
         {
-            var filePath = Path.Combine(hostingEnvironment.WebRootPath, Img);
+            var filePath = Path.Combine(hostingEnvironment.ContentRootPath, Img);
             FileInfo img = new FileInfo(filePath);
             await img.DeleteAsync();
         }
@@ -173,6 +173,7 @@ namespace HM21.Controllers
         string GetUniqueFileName(string FileName)
         {
             FileName = Path.GetFileName(FileName);
+
             return Path.GetFileNameWithoutExtension(FileName)
                       + "_" + Guid.NewGuid().ToString().Substring(0, 4)
                       + Path.GetExtension(FileName);
@@ -185,9 +186,14 @@ namespace HM21.Controllers
         /// <returns></returns>
          string GetFile(string fileName)
         {
+            var base64String = "";
             var path = Path.Combine(hostingEnvironment.ContentRootPath, fileName);
-            var mas = System.IO.File.ReadAllBytes(path);
-            var base64String = Convert.ToBase64String(mas, 0, mas.Length);
+            if (System.IO.File.Exists(path))
+            {
+                var mas = System.IO.File.ReadAllBytes(path);
+                base64String = Convert.ToBase64String(mas, 0, mas.Length);
+            }
+           
             return "data:image/png;base64," + base64String;
         }
     }
