@@ -114,6 +114,60 @@ namespace HM21.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Создание позиции из десктоп
+        /// </summary>
+        /// <param name="food"></param>
+        /// <returns></returns>
+        [HttpPost("wpf")]
+        public async Task<ActionResult<Food>> CreateFoodWpf(CreateFoodDto food)
+        {
+            if (food.Name == null)
+                return NotFound();
+
+            var uniqueNameFile = "";
+            var style = NumberStyles.Number | NumberStyles.AllowCurrencySymbol;
+            var provider = new CultureInfo("ru-RU");
+
+            try
+            {
+                var number = Decimal.Parse(food.Price.Replace('.', ','), style, provider);
+
+                var foodEntity = _mapper.Map<Food>(food);
+                foodEntity.Img = $"img/uploads/{uniqueNameFile}";
+                _context.Foods.Add(foodEntity);
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e.Message);
+            }
+            return Ok();
+        }
+
+        [HttpPut("wpf")]
+        public async Task<IActionResult> PutFoodWpf( UpdateFoodDTO food)
+        {
+            if (!FoodExists(food.Id))
+                return NotFound();
+
+            var foodentity = await _context.Foods.FindAsync(food.Id);
+            _mapper.Map(food, foodentity);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest();
+            }
+
+            return NoContent();
+        }
+
         // DELETE: api/Foods/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFood(int id)
@@ -141,8 +195,12 @@ namespace HM21.Controllers
         async void DeleteImg(string Img)
         {
             var filePath = Path.Combine(hostingEnvironment.ContentRootPath, Img);
-            FileInfo img = new FileInfo(filePath);
-            await img.DeleteAsync();
+            if (System.IO.File.Exists(filePath))
+            {
+                FileInfo img = new FileInfo(filePath);
+                await img.DeleteAsync();
+            }
+            
         }
         /// <summary>
         /// Копирует в папку изображение пришедшее с клиента
@@ -170,7 +228,7 @@ namespace HM21.Controllers
         /// </summary>
         /// <param name="FileName">Название файла</param>
         /// <returns>Уникальное названеифайла</returns>
-        string GetUniqueFileName(string FileName)
+        static string GetUniqueFileName(string FileName)
         {
             FileName = Path.GetFileName(FileName);
 
