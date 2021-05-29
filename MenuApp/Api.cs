@@ -46,7 +46,7 @@ namespace MenuApp
 
         public void DeleteFood(int id)
         {
-            string url = $"http://localhost:5000/api/Foods/wpf/{id}";
+            string url = $"http://localhost:5000/api/Foods/{id}";
             _ = HttpClient.DeleteAsync(
                 requestUri: url).Result;
 

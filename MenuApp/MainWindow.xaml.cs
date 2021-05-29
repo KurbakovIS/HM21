@@ -41,13 +41,40 @@ namespace MenuApp
 
             btnDel.Click += delegate
             {
-                //context.DeleteFood();
+                context.DeleteFood(int.Parse(txtId.Text));
+            };
+
+            btnChange.Click += delegate
+            {
+                context.UpdateFood(new FoodForUpdateDto()
+                {
+                    Id= int.Parse(txtId.Text),
+                    Name = txtName.Text,
+                    Description = txtDescription.Text,
+                    Price = txtPrice.Text,
+                });
+                txtDescription.Text = "";
+                txtName.Text = "";
+                txtId.Text = "";
+                txtPrice.Text = "";
             };
         }
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9,]+");
             e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var lbi = (sender as ListBox).SelectedItem as Food;
+            if(lbi != null)
+            {
+                txtDescription.Text = lbi.Description;
+                txtName.Text = lbi.Name;
+                txtId.Text = lbi.Id.ToString();
+                txtPrice.Text = lbi.Price.ToString();
+            }    
         }
     }
 }

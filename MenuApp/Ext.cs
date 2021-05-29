@@ -16,9 +16,8 @@ namespace MenuApp
         {
             ObservableCollection<Food> t = new ObservableCollection<Food>();
             foreach (var item in e)
-            {
                 t.Add(item);
-            }
+
             return t;
         }
     }

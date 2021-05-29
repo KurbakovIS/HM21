@@ -37,7 +37,8 @@ namespace HM21.Controllers
         {
             var foods = await _context.Foods.ToListAsync();
             foreach(var food in foods)
-                food.Img = GetFile(food.Img);
+                if(food.Img != null)
+                    food.Img = GetFile(food.Img);
             return foods;
         }
 
@@ -175,8 +176,8 @@ namespace HM21.Controllers
             var food = await _context.Foods.FindAsync(id);
             if (food == null)
                 return NotFound();
-
-            DeleteImg(food.Img);
+            if(food.Img != null)            
+                DeleteImg(food.Img);
             _context.Foods.Remove(food);
             await _context.SaveChangesAsync();
 
